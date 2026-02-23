@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مصارف تیل</title>
+  <title data-i18n="fuel_expenses_title">مصارف تیل</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="./global.css">
+  <script src="./translations.js"></script>
 </head>
 <body class="h-screen">
 <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; font-size: 1rem;">
@@ -17,7 +18,7 @@
     <div class="smoke smoke1">💨</div>
     <div class="smoke smoke2">🌫️</div>
   </div>
-  <p style="margin: 10px 0 0; font-weight: bold; text-shadow: 0 0 10px rgba(255,255,255,0.5);">
+  <p style="margin: 10px 0 0; font-weight: bold; text-shadow: 0 0 10px rgba(255,255,255,0.5);" data-i18n="loading">
     در حال بارگذاری...
   </p>
 </div>
@@ -29,25 +30,49 @@
             ⛽
           </div>
           <div>
-            <h1 class="text-3xl font-bold text-white">مصارف تیل</h1>
-            <p class="text-gray-300 mt-1">پارکینگ مزار شریف</p>
+            <h1 class="text-3xl font-bold text-white" data-i18n="fuel_expenses_header">مصارف تیل</h1>
+            <p class="text-gray-300 mt-1" data-i18n="company_name">پارکینگ مزار شریف</p>
           </div>
         </div>
-        <div class="text-left">
-          <p class="text-sm text-gray-300">تاریخ</p>
-          <p id="current-date" class="text-lg font-bold text-white"></p>
+        <div class="flex items-center gap-4">
+          <!-- Language Toggle Button -->
+          <div class="relative">
+            <button id="language-toggle" class="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center cursor-pointer hover:bg-opacity-30 transition-all duration-200 text-xl" onclick="toggleLanguageDropdown()" data-i18n-title="select_language" title="انتخاب زبان">
+              <span id="language-icon">🌐</span>
+            </button>
+            <div id="language-dropdown" class="absolute hidden z-50 w-48 bg-white rounded-lg shadow-lg top-12 left-0">
+              <div class="py-2">
+                <button onclick="setLanguage('fa'); toggleLanguageDropdown();" class="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                  <span class="text-xl">🇦🇫</span>
+                  <span>فارسی</span>
+                </button>
+                <button onclick="setLanguage('en'); toggleLanguageDropdown();" class="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                  <span class="text-xl">🇺🇸</span>
+                  <span>English</span>
+                </button>
+                <button onclick="setLanguage('ps'); toggleLanguageDropdown();" class="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                  <span class="text-xl">🇦🇫</span>
+                  <span>پښتو</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="text-left">
+            <p class="text-sm text-gray-300" data-i18n="date">تاریخ</p>
+            <p id="current-date" class="text-lg font-bold text-white"></p>
+          </div>
         </div>
       </div>
     </div>
     <div class="card p-6 mb-6">
       <div class="flex items-center justify-between mb-6">
-        <button class="btn btn-secondary" onclick="navigateTo('./fuel-consumption.html')"> ← بازگشت </button>
-        <h2 class="text-2xl font-bold text-white">لیست مصارف تیل</h2>
+        <button class="btn btn-secondary" onclick="navigateTo('./fuel-consumption.html')"> ← <span data-i18n="back_to_fuel">بازگشت</span> </button>
+        <h2 class="text-2xl font-bold text-white" data-i18n="fuel_list_title">لیست مصارف تیل</h2>
       </div>
       <div class="flex items-center justify-between mb-4">
-        <button class="btn btn-success" onclick="openFuelReportModal()">ثبت گزارش</button>
+        <button class="btn btn-success" onclick="openFuelReportModal()"><span data-i18n="register_fuel_report">ثبت گزارش</span></button>
         <div class="relative w-full p-4">
-          <input type="text" id="fuel-search" class="input-field pl-10 text-gray-800 mt-2" placeholder="جستجو بر اساس نام موتور سکیل ...">
+          <input type="text" id="fuel-search" class="input-field pl-10 text-gray-800 mt-2" data-i18n-placeholder="search_fuel_placeholder" placeholder="جستجو بر اساس نام موتور سکیل ...">
         </div>
       </div>
       </div>
@@ -57,15 +82,15 @@
  </div>
 <div id="motorcycle-reports-modal" class="modal">
   <div class="modal-content32">
-    <h2 class="text-2xl font-bold text-gray-300 mb-6" id="motorcycle-reports-title">گزارش‌های تیل برای موتور</h2>
+    <h2 class="text-2xl font-bold text-gray-300 mb-6" id="motorcycle-reports-title" data-i18n="fuel_reports_for_motorcycle">گزارش‌های تیل برای موتور</h2>
     <div class="mb-4">
-      <label class="block text-sm font-semibold text-gray-300 mb-2">جستجو بر اساس تاریخ:</label>
+      <label class="block text-sm font-semibold text-gray-300 mb-2" data-i18n="search_by_date">جستجو بر اساس تاریخ:</label>
       <input type="date" id="fuel-report-date-search" class="input-field text-gray-800 mt-1" onchange="filterFuelReportsByDate()">
     </div>
     <div id="motorcycle-reports-list" class="grid grid-cols-1 sm:grid-cols-3 gap-4 overflow-y-auto max-h-96 p-4">
     </div>
     <div class="flex gap-3 mt-6">
-      <button type="button" class="btn btn-secondary flex-1" onclick="closeModal('motorcycle-reports-modal')">❌ بستن</button>
+      <button type="button" class="btn btn-secondary flex-1" onclick="closeModal('motorcycle-reports-modal')">❌ <span data-i18n="close">بستن</span></button>
     </div>
   </div>
 </div>
@@ -74,18 +99,18 @@
   
   <div id="fuel-report-modal" class="modal">
     <div class="modal-content">
-      <h2 class="text-2xl font-bold text-gray-300 mb-6">ثبت گزارش مصارف تیل</h2>
+      <h2 class="text-2xl font-bold text-gray-300 mb-6" data-i18n="fuel_report">ثبت گزارش مصارف تیل</h2>
       <form id="fuel-report-form" onsubmit="submitFuelReport(event)">
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-300 mb-2">انتخاب موتور سکیل</label>
+            <label class="block text-sm font-semibold text-gray-300 mb-2" data-i18n="select_motorcycle">انتخاب موتور سکیل</label>
             <div class="relative">
               <button type="button" id="fuel-motorcycle-select" class="input-field text-right cursor-pointer flex items-center justify-between text-gray-700 mt-1" onclick="toggleFuelMotorcycleDropdown()">
-                <span id="fuel-motorcycle-display">موتور سکیل را انتخاب کنید</span> <span>▼</span>
+                <span id="fuel-motorcycle-display" data-i18n="select_fuel_motorcycle">موتور سکیل را انتخاب کنید</span> <span>▼</span>
               </button>
               <div id="fuel-motorcycle-dropdown" class="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-hidden z-10 hidden">
                 <div class="p-3 border-b border-gray-200">
-                  <input type="text" id="fuel-motorcycle-search" class="w-full p-2 border border-gray-800 rounded-md text-sm" placeholder="🔍 جستجو در موتور سکیل‌ها..." oninput="searchFuelMotorcycles()">
+                  <input type="text" id="fuel-motorcycle-search" class="w-full p-2 border border-gray-800 rounded-md text-sm" data-i18n-placeholder="search_motorcycles" placeholder="🔍 جستجو در موتور سکیل‌ها..." oninput="searchFuelMotorcycles()">
                 </div>
                 <div id="fuel-motorcycle-options" class="max-h-48 overflow-y-auto text-gray-800 mt-1"></div>
               </div>
@@ -93,28 +118,28 @@
             </div>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-300 mb-2">نوعیت تیل</label>
+            <label class="block text-sm font-semibold text-gray-300 mb-2" data-i18n="fuel_type_label">نوعیت تیل</label>
             <select id="fuel-type" class="input-field text-gray-800 mt-1" required>
-              <option value="">انتخاب کنید</option>
-              <option value="پطرول">پطرول</option>
-              <option value="دیزل">دیزل</option>
+              <option value="" data-i18n="fuel_type_select">انتخاب کنید</option>
+              <option value="پطرول" data-i18n="petrol">پطرول</option>
+              <option value="دیزل" data-i18n="diesel">دیزل</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-300 mb-2">مقدار تیل</label>
-            <input type="number" id="fuel-amount" class="input-field text-gray-800 mt-1" placeholder="مثال: 5 لیتر" required step="0.1">
+            <label class="block text-sm font-semibold text-gray-300 mb-2" data-i18n="fuel_amount_label">مقدار تیل</label>
+            <input type="number" id="fuel-amount" class="input-field text-gray-800 mt-1" data-i18n-placeholder="fuel_amount_placeholder" placeholder="مثال: 5 لیتر" required step="0.1">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-300 mb-2">میزان کیلومتر</label>
-            <input type="number" id="kilometer-amount" class="input-field text-gray-800 mt-1" placeholder="مثال: 100 کیلومتر" required step="0.1">
+            <label class="block text-sm font-semibold text-gray-300 mb-2" data-i18n="kilometer_label">میزان کیلومتر</label>
+            <input type="number" id="kilometer-amount" class="input-field text-gray-800 mt-1" data-i18n-placeholder="kilometer_placeholder" placeholder="مثال: 100 کیلومتر" required step="0.1">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-300 mb-2">تاریخ اضافه کردن تیل</label>
+            <label class="block text-sm font-semibold text-gray-300 mb-2" data-i18n="fuel_date_label">تاریخ اضافه کردن تیل</label>
             <input type="date" id="fuel-addition-date" class="input-field text-gray-800 mt-1" required>
           </div>
           <div class="flex gap-3 mt-6">
-            <button type="submit" class="btn btn-success flex-1">✅ ثبت</button>
-            <button type="button" class="btn btn-secondary flex-1" onclick="closeModal('fuel-report-modal')">❌ انصراف</button>
+            <button type="submit" class="btn btn-success flex-1">✅ <span data-i18n="submit_btn">ثبت</span></button>
+            <button type="button" class="btn btn-secondary flex-1" onclick="closeModal('fuel-report-modal')">❌ <span data-i18n="cancel">انصراف</span></button>
           </div>
         </div>
       </form>

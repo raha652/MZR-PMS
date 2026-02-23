@@ -102,7 +102,7 @@ JalaliDate.jalaliToGregorian = function (j_y, j_m, j_d) {
   gd = gd < 10 ? "0" + gd : gd;
   return [gy, gm, gd];
 };
-const dataStorageKey = 'motorcycleManagementData_${defaultConfig.company_name}';
+const dataStorageKey = `motorcycleManagementData_${defaultConfig.company_name}`;
 const usersStorageKey = 'userAccountsData';
 function generateId() {
   return Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -142,7 +142,7 @@ async function loadUsers() {
   try {
     const stored = localStorage.getItem(usersStorageKey);
     allUsers = stored && stored !== 'undefined' ? JSON.parse(stored) : [];
-if (allUsers.length === 0) {
+    if (allUsers.length === 0) {
       const defaultAdmin = {
         __backendId: generateId(),
         fullName: 'شهاب حمیدی',
@@ -255,12 +255,12 @@ function openEditAccountModal(userId, username, fullName, password, role, positi
   document.getElementById('edit-account-role').value = role;
   document.getElementById('edit-account-position').value = position;
   document.getElementById('edit-account-department').value = department;
-  
+
   // Parse custom displays
   const displays = customDisplays ? customDisplays.split(',') : [];
   document.getElementById('edit-account-show-maintenance').checked = displays.includes('تعمیرات');
   document.getElementById('edit-account-show-notifications').checked = displays.includes('اعلانات');
-  
+
   document.getElementById('edit-account-form').dataset.userId = userId;
   document.getElementById('edit-account-modal').classList.add('active');
 }
@@ -273,14 +273,14 @@ async function submitEditAccount(event) {
   const role = document.getElementById('edit-account-role').value;
   const position = document.getElementById('edit-account-position').value.trim();
   const department = document.getElementById('edit-account-department').value.trim();
-  
+
   // Get custom displays
   const showMaintenance = document.getElementById('edit-account-show-maintenance').checked;
   const showNotifications = document.getElementById('edit-account-show-notifications').checked;
   const customDisplays = [];
   if (showMaintenance) customDisplays.push('تعمیرات');
   if (showNotifications) customDisplays.push('اعلانات');
-  
+
   if (!fullName || !username || !password || !role || !position || !department) {
     showToast('لطفاً همه فیلدها را پر کنید', '⚠️');
     return;
@@ -301,17 +301,17 @@ async function syncUsersWithGoogleSheets() {
       const gsUsers = result.data
         .map(mapGSToUser)
         .filter(user => user.__backendId);
-      
+
       // Preserve customDisplays for admin user and merge with local data
       const localUsers = [...allUsers];
-      
+
       for (let gsUser of gsUsers) {
         const localUser = localUsers.find(u => u.username === gsUser.username);
         if (localUser && localUser.customDisplays && !gsUser.customDisplays) {
           gsUser.customDisplays = localUser.customDisplays;
         }
       }
-      
+
       const defaultAdminExists = gsUsers.some(u => u.username === 'admin');
       if (!defaultAdminExists) {
         const defaultAdmin = {
@@ -630,7 +630,7 @@ async function setUserOnlineStatus(username, status) {
       // Sync with Google Sheets
       const gsData = mapUserToGS(user);
       await callGoogleSheets('update', 'accounts', gsData);
-      
+
       // آپدیت وضعیت آنلاین در داشبورد
       updateOnlineStatus();
     }
@@ -643,7 +643,7 @@ async function setUserOnlineStatus(username, status) {
 async function checkAndUpdateOnlineStatus() {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
   let updated = false;
-  
+
   for (let i = 0; i < allUsers.length; i++) {
     const user = allUsers[i];
     if (user.onlineStatus === 'online' && user.lastActivity) {
@@ -651,7 +651,7 @@ async function checkAndUpdateOnlineStatus() {
       if (lastActivity < fiveMinutesAgo) {
         user.onlineStatus = 'offline';
         updated = true;
-        
+
         // آپدیت در Google Sheets
         try {
           const gsData = mapUserToGS(user);
@@ -662,7 +662,7 @@ async function checkAndUpdateOnlineStatus() {
       }
     }
   }
-  
+
   if (updated) {
     await saveUsers(allUsers);
     updateOnlineStatus();
@@ -722,16 +722,16 @@ function renderAccounts() {
         </div>
       `;
     }
-    
+
     // Display custom displays
     let customDisplaysHtml = '';
     if (user.customDisplays) {
       const displays = user.customDisplays.split(',').filter(d => d);
       if (displays.length > 0) {
-        customDisplaysHtml = `<p class="text-gray-200 mt-1">نمایش‌ها: ${displays.join('، ')}</p>`;
+        customDisplaysHtml = `<p class="text-gray-200 mt-1">${t('displays')}: ${displays.join('، ')}</p>`;
       }
     }
-    
+
     return `
       <div class="card p-6">
         <div class="flex items-center justify-between">
@@ -741,10 +741,10 @@ function renderAccounts() {
             </div>
             <div>
               <h3 class="text-lg font-bold text-white">${user.fullName}</h3>
-              <p class="text-gray-200 mt-1">نام کاربری: ${user.username}</p>
-              <p class="text-gray-200 mt-1">نقش: ${user.role === 'admin' ? 'ادمین' : 'کاربر'}</p>
-              <p class="text-gray-200 mt-1">موقعیت شغلی: ${user.position || 'نامشخص'}</p>
-              <p class="text-gray-200 mt-1">دیپارتمنت: ${user.department || 'نامشخص'}</p>
+              <p class="text-gray-200 mt-1">${t('username')}: ${user.username}</p>
+              <p class="text-gray-200 mt-1">${t('role')}: ${user.role === 'admin' ? t('admin') : t('user')}</p>
+              <p class="text-gray-200 mt-1">${t('position')}: ${user.position || t('unknown')}</p>
+              <p class="text-gray-200 mt-1">${t('department')}: ${user.department || t('unknown')}</p>
               ${customDisplaysHtml}
             </div>
           </div>
@@ -796,7 +796,7 @@ function renderUsageMotorcycles() {
   }
 
   if (filteredMotorcycles.length === 0) {
-    container.innerHTML = '<div class="text-center py-12 text-gray-300"><p class="text-lg">هیچ موتورسیکلی یافت نشد</p></div>';
+    container.innerHTML = `<div class="text-center py-12 text-gray-300"><p class="text-lg">${tm('no_motorcycle_registered')}</p></div>`;
     return;
   }
 
@@ -807,10 +807,10 @@ function renderUsageMotorcycles() {
           <div class="motorcycle-icon">🏍️</div>
           <div>
             <h3 class="text-lg font-bold text-white">${moto.motorcycleName}</h3>
-            <p class="text-gray-200 mt-1">رنگ: ${moto.motorcycleColor}</p>
-            <p class="text-gray-200 mt-1">دیپارتمنت: ${moto.motorcycleDepartment}</p>
-            <p class="text-gray-200 mt-1">پلاک: ${moto.motorcyclePlate}</p>
-            <p class="text-gray-200 mt-1">مجموعه استفاده: ${moto.filteredUsage || '00:00'}</p>
+            <p class="text-gray-200 mt-1">${tm('color')}: ${moto.motorcycleColor}</p>
+            <p class="text-gray-200 mt-1">${tm('department')}: ${moto.motorcycleDepartment}</p>
+            <p class="text-gray-200 mt-1">${tm('plate')}: ${moto.motorcyclePlate}</p>
+            <p class="text-gray-200 mt-1">${tm('total_usage')}: ${moto.filteredUsage || '00:00'}</p>
           </div>
         </div>
       </div>
@@ -821,14 +821,14 @@ function renderUsageMotorcycles() {
 function showUsageHistoryModal(motorcycleId) {
   const motorcycle = allData.find(d => d.__backendId === motorcycleId && d.type === 'motorcycle');
   if (!motorcycle) {
-    showToast('موتورسیکلت یافت نشد', '❌');
+    showToast(tm('motorcycle_not_found'), '❌');
     return;
   }
   const history = allData.filter(d => d.type === 'request' && d.motorcycleId === motorcycleId && (d.status === 'completed' || d.status === 'delet'));
-  document.getElementById('modal-title').textContent = `تاریخچه استفاده: ${motorcycle.motorcycleName} (${motorcycle.motorcycleDepartment})`;
+  document.getElementById('modal-title').textContent = `${tm('usage_history_title')}: ${motorcycle.motorcycleName} (${motorcycle.motorcycleDepartment})`;
   const list = document.getElementById('usage-history-list');
   if (history.length === 0) {
-    list.innerHTML = '<div class="text-center py-12 text-gray-300"><p class="text-lg">هیچ تاریخچه‌ای برای این موتورسیکلت وجود ندارد</p></div>';
+    list.innerHTML = `<div class="text-center py-12 text-gray-300"><p class="text-lg">${tm('no_usage_history')}</p></div>`;
   } else {
     list.innerHTML = history.map(req => `
       <div class="card p-6">
@@ -836,14 +836,13 @@ function showUsageHistoryModal(motorcycleId) {
           <div class="flex items-center gap-4">
             <div class="motorcycle-icon">📅</div>
             <div>
-              <h3 class="text-lg font-bold text-white">تاریخ: ${req.requestDate}</h3>
-              <p class="text-gray-200 mt-1">ساعت خروج: ${req.exitTime || 'نامشخص'}</p>
-              <p class="text-gray-200 mt-1">مدت استفاده: ${formatUsageTime(req.usageTime) || 'نامشخص'}</p>
-              <!-- <p class="text-gray-200 mt-1">کاربر: ${req.employeeName || 'نامشخص'}</p> -->
+              <h3 class="text-lg font-bold text-white">${tm('date')}: ${req.requestDate}</h3>
+              <p class="text-gray-200 mt-1">${tm('exit_time')}: ${req.exitTime || tm('unknown')}</p>
+              <p class="text-gray-200 mt-1">${tm('usage_time')}: ${formatUsageTime(req.usageTime) || tm('unknown')}</p>
             </div>
           </div>
           <span class="status-badge ${req.status === 'completed' ? 'status-completed' : 'status-deleted'}">
-            ${req.status === 'completed' ? '✅ تکمیل' : '❌ حذف شده'}
+            ${req.status === 'completed' ? '✅ ' + tm('completed') : '❌ ' + tm('deleted')}
           </span>
         </div>
       </div>
@@ -869,14 +868,14 @@ async function submitNewAccount(event) {
   const role = document.getElementById('account-role').value;
   const position = document.getElementById('account-position').value.trim();
   const department = document.getElementById('account-department').value.trim();
-  
+
   // Get custom displays
   const showMaintenance = document.getElementById('account-show-maintenance').checked;
   const showNotifications = document.getElementById('account-show-notifications').checked;
   const customDisplays = [];
   if (showMaintenance) customDisplays.push('تعمیرات');
   if (showNotifications) customDisplays.push('اعلانات');
-  
+
   if (!fullName || !username || !password || !role || !position || !department) {
     showToast('لطفاً همه فیلدها را پر کنید', '⚠️');
     return;
@@ -925,8 +924,7 @@ async function initApp() {
   session.fullName = currentUser.fullName;
   localStorage.setItem('session', JSON.stringify(session));
 
-  // Set user as online
-  await setUserOnlineStatus(currentUser.username, 'online');
+  // Update UI elements immediately
   if (document.getElementById('current-user')) {
     document.getElementById('current-user').textContent = currentUser.fullName || "کاربر ناشناس";
   }
@@ -945,59 +943,35 @@ async function initApp() {
   if (newAccountBtn && currentUserRole !== 'admin') {
     newAccountBtn.classList.add('hidden');
   }
-if (getCurrentPage() === 'management') {
+  if (getCurrentPage() === 'management') {
     const accountsCard = document.querySelector('button[onclick*="accounts"], .card[onclick*="accounts"], div[onclick*="accounts"], [onclick*="accounts"]');
     if (accountsCard && currentUserRole !== 'admin') {
       accountsCard.classList.add('hidden');
     }
   }
-  
+
   // Note: Maintenance card should always be visible
   // Password requirement is handled in openPasswordModal function
+  
+  // Initialize data SDK from localStorage first (fast)
+  await window.dataSdk.init(dataHandler);
+  
+  // Update date/time and hide loading quickly
   updateDateTime();
   setInterval(updateDateTime, 60000);
   hideLoading();
-  const initResult = await window.dataSdk.init(dataHandler);
-  if (!initResult.isOk) {
-    showToast('خطا در بارگذاری داده‌ها', '❌');
-  }
+  
+  // Now do all syncs in background (non-blocking) - user can see the page
+  setUserOnlineStatus(currentUser.username, 'online');
+  
+  // Sync data for current page from Google Sheets in background
   const page = getCurrentPage();
-  await loadAndSyncDataForPage(page);
-  if (window.elementSdk && typeof window.elementSdk.init === 'function') {
-    await window.elementSdk.init({
-      defaultConfig,
-      onConfigChange: async (config) => {
-        document.getElementById('dashboard-title').textContent = config.dashboard_title || defaultConfig.dashboard_title;
-        document.getElementById('company-name').textContent = config.company_name || defaultConfig.company_name;
-      },
-      mapToCapabilities: (config) => ({
-        recolorables: [
-          {
-            get: () => config.primary_color || defaultConfig.primary_color,
-            set: (value) => {
-              window.elementSdk.config.primary_color = value;
-              window.elementSdk.setConfig({ primary_color: value });
-            }
-          }
-        ],
-        borderables: [],
-        fontEditable: undefined,
-        fontSizeable: undefined
-      }),
-      mapToEditPanelValues: (config) => new Map([
-        ['dashboard_title', config.dashboard_title || defaultConfig.dashboard_title],
-        ['company-name', config.company_name || defaultConfig.company_name]
-      ])
-    });
-  } else {
-    console.warn('elementSdk is not available. Skipping initialization.');
-    if (document.getElementById('dashboard-title')) {
-      document.getElementById('dashboard-title').textContent = defaultConfig.dashboard_title;
-    }
-    if (document.getElementById('company-name')) {
-      document.getElementById('company-name').textContent = defaultConfig.company_name;
-    }
-  }
+  loadAndSyncDataForPage(page).then(() => {
+    updateCurrentPage();
+  });
+  // Skip elementSdk initialization to preserve translation system
+  // Dashboard title and company name use data-i18n attributes for translations
+  console.log('Translation system active - using data-i18n for text content');
   updateCurrentPage();
   if (window.location.pathname.includes('requests')) {
     renderRequests(allData.filter(d => d.type === 'request'));
@@ -1056,14 +1030,14 @@ if (getCurrentPage() === 'management') {
   }
   setupIdleLogout();
   setInterval(syncAllData, SYNC_INTERVAL_MS); // Use named constant
-  
+
   // بررسی وضعیت آنلاین هر 1 دقیقه
   setInterval(checkAndUpdateOnlineStatus, 60000);
-  
+
   // Load notification badge
   loadNotificationBadge();
   setInterval(loadNotificationBadge, 30000); // Update every 30 seconds
-  
+
   // آپدیت فعالیت کاربر در هر حرکت ماوس یا کلیک
   ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => {
     document.addEventListener(event, updateUserActivity, true);
@@ -1163,7 +1137,7 @@ function renderRequests(requests) {
     );
   }
   if (filteredRequests.length === 0) {
-    container.innerHTML = '<div class="text-center py-12 text-gray-300"><p class="text-lg">هیچ موتور سکیلی درخواست نشده است</p><p class="text-sm mt-2">تمام موتور سکیل‌ها در دسترس هستند</p></div>';
+    container.innerHTML = `<div class="text-center py-12 text-gray-300"><p class="text-lg">${tm('no_requests_found')}</p><p class="text-sm mt-2">${tm('all_motorcycles_available')}</p></div>`;
     return;
   }
   container.innerHTML = filteredRequests.map(request => {
@@ -1206,18 +1180,17 @@ function renderMotorcycles(motorcycles) {
   const container = document.getElementById('motorcycles-list');
   if (!container) return;
   if (motorcycles.length === 0) {
-    container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-300"><p class="text-lg">هیچ موتور سکیلی ثبت نشده است</p></div>';
+    container.innerHTML = `<div class="col-span-full text-center py-12 text-gray-300"><p class="text-lg">${tm('no_motorcycles_found')}</p></div>`;
     return;
   }
   container.innerHTML = motorcycles.map(motorcycle => {
-    // Status badge with color coding
-    const status = motorcycle.motorcycleStatus || 'سالم';
+    // Status badge with color coding - translate from Persian to current language
+    const rawStatus = motorcycle.motorcycleStatus || 'سالم';
+    const status = translateStatus(rawStatus);
     let statusClass = '';
-    if (status === 'سالم') {
+    if (rawStatus === 'سالم') {
       statusClass = 'bg-green-500';
-    } else if (status === 'مفقود') {
-      statusClass = 'bg-red-500';
-    } else if (status === 'خراب') {
+    } else if (rawStatus === 'مفقود' || rawStatus === 'خراب') {
       statusClass = 'bg-red-500';
     }
 
@@ -1230,14 +1203,14 @@ function renderMotorcycles(motorcycles) {
         </div>
         <div class="flex-1">
           <h3 class="text-lg font-bold text-white">${motorcycle.motorcycleName}</h3>
-          <p class="text-gray-200">🎨 ${motorcycle.motorcycleColor}</p>
-          <p class="text-sm text-gray-200 font-semibold">🏢 ${motorcycle.motorcycleDepartment}</p>
+          <p class="text-gray-200">🎨 ${tm('color')}: ${motorcycle.motorcycleColor}</p>
+          <p class="text-sm text-gray-200 font-semibold">🏢 ${tm('department')}: ${motorcycle.motorcycleDepartment}</p>
         </div>
       </div>
       <div class="border-t border-gray-600 pt-4">
-        <p class="text-sm text-gray-100">🔢 پلاک: ${motorcycle.motorcyclePlate}</p>
+        <p class="text-sm text-gray-100">🔢 ${tm('plate')}: ${motorcycle.motorcyclePlate}</p>
         <div class="mt-2 flex items-center gap-2">
-          <span class="text-sm text-gray-100">وضعیت:</span>
+          <span class="text-sm text-gray-100">${tm('status')}:</span>
           <span class="px-3 py-1 rounded-full text-xs font-semibold text-white ${statusClass}">${status}</span>
         </div>
       </div>
@@ -1248,7 +1221,7 @@ function renderMotorcycles(motorcycles) {
 function showMotorcycleDetails(motorcycleId) {
   const motorcycle = allData.find(d => d.__backendId === motorcycleId);
   if (!motorcycle) {
-    showToast('موتور سکیل یافت نشد', '❌');
+    showToast(tm('motorcycle_not_found'), '❌');
     return;
   }
   currentMotorcycleId = motorcycleId;
@@ -1261,43 +1234,42 @@ function showMotorcycleDetails(motorcycleId) {
   if (!activeRequest) {
     statusHtml = `
       <div class="bg-green-100 border border-green-200 p-3 rounded-lg text-sm">
-        <p class="text-green-800 font-bold">🅿️ موجود در پارکینگ</p>
+        <p class="text-green-800 font-bold">🅿️ ${tm('available_in_parking')}</p>
       </div>
     `;
   } else if (activeRequest.status === 'pending') {
     statusHtml = `
       <div class="bg-yellow-100 border border-yellow-200 p-3 rounded-lg text-sm">
-        <p class="text-yellow-800 font-bold">⏳ در انتظار خروج</p>
+        <p class="text-yellow-800 font-bold">⏳ ${tm('waiting_for_exit')}</p>
         <p class="text-xs text-yellow-700 mt-1">👤 ${activeRequest.employeeName}</p>
       </div>
     `;
   } else {
     statusHtml = `
       <div class="bg-red-100 border border-red-200 p-3 rounded-lg text-sm">
-        <p class="text-red-800 font-bold">🔄 در حال استفاده</p>
+        <p class="text-red-800 font-bold">🔄 ${tm('in_use')}</p>
         <p class="text-xs text-red-700 mt-1">👤 ${activeRequest.employeeName}</p>
-        ${activeRequest.exitTime ? `<p class="text-xs text-red-600">🚀 زمان خروج: ${activeRequest.exitTime}</p>` : ''}
+        ${activeRequest.exitTime ? `<p class="text-xs text-red-600">🚀 ${tm('exit_time')}: ${activeRequest.exitTime}</p>` : ''}
       </div>
     `;
   }
   let photoHtml = motorcycle.motorcyclePhoto ?
-    `<img src="${motorcycle.motorcyclePhoto}" alt="عکس موتور سکیل" class="w-full h-48 object-contain rounded-lg mb-4">` :
+    `<img src="${motorcycle.motorcyclePhoto}" alt="${tm('motorcycle_photo')}" class="w-full h-48 object-contain rounded-lg mb-4">` :
     `<div class="motorcycle-icon-large mb-4">🏍️</div>`;
-  const licenseHtml = motorcycle.motorcycleLicense ? `<tr><td class="px-4 py-2 font-semibold">نمبر جواز سیر</td><td class="px-4 py-2">${motorcycle.motorcycleLicense}</td></tr>` : '';
-  const gpsStatusHtml = motorcycle.motorcycleGpsStatus ? `<tr><td class="px-4 py-2 font-semibold">وضعیت جی پی اس</td><td class="px-4 py-2">${motorcycle.motorcycleGpsStatus}</td></tr>` : '';
+  const licenseHtml = motorcycle.motorcycleLicense ? `<tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('license_number')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleLicense}</td></tr>` : '';
+  const gpsStatusHtml = motorcycle.motorcycleGpsStatus ? `<tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('gps_status')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleGpsStatus}</td></tr>` : '';
 
-  // Status badge with color coding
-  const conditionStatus = motorcycle.motorcycleStatus || 'سالم';
+  // Status badge with color coding - translate from Persian to current language
+  const rawConditionStatus = motorcycle.motorcycleStatus || 'سالم';
+  const conditionStatus = translateStatus(rawConditionStatus);
   let conditionClass = '';
-  if (conditionStatus === 'سالم') {
+  if (rawConditionStatus === 'سالم') {
     conditionClass = 'bg-green-100 text-green-800';
-  } else if (conditionStatus === 'مفقود') {
-    conditionClass = 'bg-red-100 text-red-800';
-  } else if (conditionStatus === 'خراب') {
+  } else if (rawConditionStatus === 'مفقود' || rawConditionStatus === 'خراب') {
     conditionClass = 'bg-red-100 text-red-800';
   }
-  const conditionHtml = `<tr><td class="px-4 py-2 font-semibold">وضعیت موتور سکیل</td><td class="px-4 py-2"><span class="px-3 py-1 rounded-full text-sm font-semibold ${conditionClass}">${conditionStatus}</span></td></tr>`;
-  const documentsButton = motorcycle.motorcycleDocuments ? `<button class="btn btn-secondary text-xs py-1 px-2 ml-2" onclick="window.open('${motorcycle.motorcycleDocuments}', '_blank')">نمایش اسناد</button>` : '';
+  const conditionHtml = `<tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('motorcycle_status')}</td><td class="px-4 py-2"><span class="px-3 py-1 rounded-full text-sm font-semibold ${conditionClass}">${conditionStatus}</span></td></tr>`;
+  const documentsButton = motorcycle.motorcycleDocuments ? `<button class="btn btn-secondary text-xs py-1 px-2 ml-2" onclick="window.open('${motorcycle.motorcycleDocuments}', '_blank')">${tm('show_documents')}</button>` : '';
   const content = `
     <div class="flex flex-col items-center">
       ${photoHtml}
@@ -1305,20 +1277,20 @@ function showMotorcycleDetails(motorcycleId) {
       <div class="w-full overflow-x-auto">
         <table class="min-w-full bg-gray-800 border border-gray-600 rounded-lg shadow-md table-beauty">
           <thead class="bg-gray-700">
-            <th class="px-4 py-2 text-right font-semibold text-white"/>مشخصات موتور سیکلت<th>
+            <th class="px-4 py-2 text-right font-semibold text-white"/>${tm('motorcycle_specs')}<th>
           </thead>
           <tbody>
-            <tr><td class="px-4 py-2 font-semibold text-gray-300">رنگ</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleColor}</td></tr>
-            <tr><td class="px-4 py-2 font-semibold text-gray-300">آیدی</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleId}</td></tr>
-            <tr><td class="px-4 py-2 font-semibold text-gray-300">شماره پلاک</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcyclePlate}</td></tr>
+            <tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('color')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleColor}</td></tr>
+            <tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('motorcycle_id')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleId}</td></tr>
+            <tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('motorcycle_plate')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcyclePlate}</td></tr>
             ${licenseHtml}
-            <tr><td class="px-4 py-2 font-semibold text-gray-300">نوعیت اسناد</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleDocumentType}</td></tr>
+            <tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('document_type')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleDocumentType}</td></tr>
             ${conditionHtml}
-            <tr><td class="px-4 py-2 font-semibold text-gray-300">نمبر شاسی</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleChassisNumber}</td></tr>
-            <tr><td class="px-4 py-2 font-semibold text-gray-300">نمبر انجین</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleEngineNumber}</td></tr>
-            <tr><td class="px-4 py-2 font-semibold text-gray-300">جی پی اس</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleGps}</td></tr>
+            <tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('chassis_number')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleChassisNumber}</td></tr>
+            <tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('engine_number')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleEngineNumber}</td></tr>
+            <tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('gps')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleGps}</td></tr>
             ${gpsStatusHtml}
-            <tr><td class="px-4 py-2 font-semibold text-gray-300">دیپارتمنت</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleDepartment}</td></tr>
+            <tr><td class="px-4 py-2 font-semibold text-gray-300">${tm('department')}</td><td class="px-4 py-2 text-gray-200">${motorcycle.motorcycleDepartment}</td></tr>
           </tbody>
         </table>
       </div>
@@ -1331,7 +1303,7 @@ function showMotorcycleDetails(motorcycleId) {
         </div>
       </div>
       <div class="mt-4 p-3 bg-blue-900 text-white rounded-lg w-full">
-        <p class="text-blue-300 font-semibold">🆔 شناسه:</p>
+        <p class="text-blue-300 font-semibold">🆔 ID:</p>
         <p class="text-sm text-blue-200 font-mono">${motorcycleId}</p>
       </div>
     </div>
@@ -1351,7 +1323,7 @@ function renderEmployees(employees) {
   const container = document.getElementById('employees-list');
   if (!container) return;
   if (employees.length === 0) {
-    container.innerHTML = '<div class="text-center py-12 text-gray-300"><p class="text-lg">هیچ کارمندی ثبت نشده است</p></div>';
+    container.innerHTML = `<div class="text-center py-12 text-gray-300"><p class="text-lg">${tm('no_employees_found')}</p></div>`;
     return;
   }
   container.innerHTML = employees.map(employee => `
@@ -1368,8 +1340,8 @@ function renderEmployees(employees) {
           </div>
         </div>
         <div class="flex gap-2">
-          <button class="btn btn-primary" onclick="openEditEmployeeModal('${employee.__backendId}')">✏️ ویرایش</button>
-          <button class="delete-btn" onclick="deleteEmployee('${employee.__backendId}')">🗑️ حذف</button>
+          <button class="btn btn-primary" onclick="openEditEmployeeModal('${employee.__backendId}')">✏️ ${tm('edit')}</button>
+          <button class="delete-btn" onclick="deleteEmployee('${employee.__backendId}')">🗑️ ${tm('delete')}</button>
         </div>
       </div>
     </div>
@@ -1379,7 +1351,7 @@ function renderHistory(filteredRequests) {
   const container = document.getElementById('history-list');
   if (!container) return;
   if (filteredRequests.length === 0) {
-    container.innerHTML = '<div class="text-center py-12 text-gray-300"><p class="text-lg">هیچ تاریخچه‌ای با فیلترهای انتخابی وجود ندارد</p></div>';
+    container.innerHTML = `<div class="text-center py-12 text-gray-300"><p class="text-lg">${tm('no_history_found')}</p></div>`;
     return;
   }
   container.innerHTML = filteredRequests.map(request => `
@@ -1390,20 +1362,20 @@ function renderHistory(filteredRequests) {
             📊
           </div>
           <div class="flex-1">
-            <h3 class="text-lg font-bold text-white">${request.motorcycleName} - ${request.motorcycleColor} - دیپارتمنت ${request.motorcycleDepartment}</h3>
+            <h3 class="text-lg font-bold text-white">${request.motorcycleName} - ${request.motorcycleColor} - ${tm('department')} ${request.motorcycleDepartment}</h3>
             <p class="text-gray-200 mt-1">👤 ${request.employeeName} ( ${request.department})</p>
-            <p class="text-gray-200 mt-1">🆔 درخواست کننده: ${request.requesterFullName || 'ناشناس'}</p>
-            ${request.deleterFullName ? `<p class="text-gray-200 mt-1">🗑️ حذف‌کننده: ${request.deleterFullName}</p>` : ''}
+            <p class="text-gray-200 mt-1">🆔 ${tm('requester')}: ${request.requesterFullName || tm('unknown')}</p>
+            ${request.deleterFullName ? `<p class="text-gray-200 mt-1">🗑️ ${tm('deleted_by')}: ${request.deleterFullName}</p>` : ''}
             <div class="flex gap-6 mt-2 text-sm text-gray-100">
               <span>📅 ${request.requestDate}</span>
-              <span>🚀 خروج: ${request.exitTime}</span>
-              <span>🏁 ورود: ${request.entryTime}</span>
-              <span>⏱ مدت زمان استفاده: ${formatUsageTime(request.usageTime) || 'نامشخص'}</span>
+              <span>🚀 ${tm('exit')}: ${request.exitTime}</span>
+              <span>🏁 ${tm('entry')}: ${request.entryTime}</span>
+              <span>⏱ ${tm('usage_time')}: ${formatUsageTime(request.usageTime) || tm('unknown')}</span>
             </div>
           </div>
         </div>
         <span class="status-badge ${request.status === 'completed' ? 'status-completed' : (request.status === 'delet' ? 'status-deleted' : '')}">
-          ${request.status === 'completed' ? '✅ تکمیل شده' : (request.status === 'delet' ? '❌ حذف شده' : 'نامعلوم')}
+          ${request.status === 'completed' ? '✅ ' + tm('completed') : (request.status === 'delet' ? '❌ ' + tm('deleted') : tm('unknown'))}
         </span>
       </div>
     </div>
@@ -1413,7 +1385,7 @@ function renderMotorcycleStatus(motorcycles, requests) {
   const container = document.getElementById('motorcycle-status-list');
   if (!container) return;
   if (motorcycles.length === 0) {
-    container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-300"><p class="text-lg">هیچ موتورسیکلی ثبت نشده است</p></div>';
+    container.innerHTML = `<div class="col-span-full text-center py-12 text-gray-300"><p class="text-lg">${tm('no_motorcycle_registered')}</p></div>`;
     return;
   }
   let availableCount = 0;
@@ -1647,8 +1619,8 @@ function filterByDepartment() {
     availableEmployees = allData.filter(d => d.type === 'employee' && d.department === selectedDepartment && !requestedEmployeeIds.includes(d.employeeId));
     availableMotorcycles = allData.filter(d => d.type === 'motorcycle' && d.motorcycleDepartment === selectedDepartment);
   }
-  employeeDisplay.textContent = availableEmployees.length > 0 ? 'کارمند را انتخاب کنید' : 'هیچ کارمندی در این دیپارتمنت یافت نشد';
-  motorcycleDisplay.textContent = availableMotorcycles.length > 0 ? 'موتور سکیل را انتخاب کنید' : 'هیچ موتور سکیلی در این دیپارتمنت یافت نشد';
+  employeeDisplay.textContent = availableEmployees.length > 0 ? tm('select_employee') : tm('no_employees_in_dept');
+  motorcycleDisplay.textContent = availableMotorcycles.length > 0 ? tm('select_motorcycle') : tm('no_motorcycles_in_dept');
   employeeSelect.disabled = false;
   motorcycleSelect.disabled = false;
   employeeSelect.classList.remove('opacity-50');
@@ -1818,7 +1790,7 @@ function openPasswordModal(type) {
     const user = window.currentUser;
     const displays = user && user.customDisplays ? user.customDisplays.split(',') : [];
     const hasMaintenancePermission = displays.includes('تعمیرات');
-    
+
     if (hasMaintenancePermission) {
       // User has permission - no password needed
       navigateTo('./maintenance.html');
@@ -2481,6 +2453,33 @@ function showToast(message, icon = '✅') {
     toast.classList.remove('active');
   }, 3000);
 }
+
+// Translate dynamic content
+function translateDynamicContent() {
+  // Re-apply translations after dynamic content is loaded
+  if (typeof applyTranslations === 'function') {
+    applyTranslations();
+  }
+}
+
+// Get translated message
+function tm(key) {
+  if (typeof t === 'function') {
+    return t(key);
+  }
+  return key;
+}
+
+// Translate motorcycle status from Persian to current language
+function translateStatus(status) {
+  const statusMap = {
+    'سالم': 'healthy',
+    'مفقود': 'missing',
+    'خراب': 'broken'
+  };
+  const englishKey = statusMap[status] || status;
+  return tm(englishKey);
+}
 document.addEventListener('click', function (event) {
   const departmentDropdown = document.getElementById('department-dropdown');
   const employeeDropdown = document.getElementById('employee-dropdown');
@@ -2566,7 +2565,7 @@ function populateFuelMotorcycleDropdown() {
   const optionsContainer = document.getElementById('fuel-motorcycle-options');
   if (!optionsContainer) return;
   if (motorcycles.length === 0) {
-    optionsContainer.innerHTML = '<div class="p-3 text-gray-500 text-center">هیچ موتور سکیلی ثبت نشده</div>';
+    optionsContainer.innerHTML = `<div class="p-3 text-gray-500 text-center">${tm('no_motorcycle_registered')}</div>`;
     return;
   }
   optionsContainer.innerHTML = motorcycles.map(moto => `
@@ -2574,7 +2573,7 @@ function populateFuelMotorcycleDropdown() {
          onclick="selectFuelMotorcycle('${moto.__backendId}', '${moto.motorcycleName} - ${moto.motorcycleColor} - ${moto.motorcycleDepartment}')">
       <div class="font-semibold">${moto.motorcycleName}</div>
       <div class="text-sm text-gray-600">${moto.motorcycleColor} - ${moto.motorcycleDepartment}</div>
-      <div class="text-xs text-gray-500">پلاک: ${moto.motorcyclePlate}</div>
+      <div class="text-xs text-gray-500">${tm('plate')}: ${moto.motorcyclePlate}</div>
     </div>
   `).join('');
 }
@@ -2589,7 +2588,7 @@ function searchFuelMotorcycles() {
   );
   const optionsContainer = document.getElementById('fuel-motorcycle-options');
   if (filtered.length === 0) {
-    optionsContainer.innerHTML = '<div class="p-3 text-gray-500 text-center">موتور سکیلی یافت نشد</div>';
+    optionsContainer.innerHTML = `<div class="p-3 text-gray-500 text-center">${tm('motorcycle_not_found')}</div>`;
     return;
   }
   optionsContainer.innerHTML = filtered.map(moto => `
@@ -2597,7 +2596,7 @@ function searchFuelMotorcycles() {
          onclick="selectFuelMotorcycle('${moto.__backendId}', '${moto.motorcycleName} - ${moto.motorcycleColor} - ${moto.motorcycleDepartment}')">
       <div class="font-semibold">${moto.motorcycleName}</div>
       <div class="text-sm text-gray-600">${moto.motorcycleColor} - ${moto.motorcycleDepartment}</div>
-      <div class="text-xs text-gray-500">پلاک: ${moto.motorcyclePlate}</div>
+      <div class="text-xs text-gray-500">${tm('plate')}: ${moto.motorcyclePlate}</div>
     </div>
   `).join('');
 }
@@ -2620,37 +2619,37 @@ function selectFuelMotorcycle(id, displayText) {
 async function submitFuelReport(event) {
   event.preventDefault();
   if (!selectedMotorcycleForFuel) {
-    showToast('لطفاً یک موتور سکیل انتخاب کنید', 'Warning');
+    showToast(tm('select_motorcycle_first'), '⚠️');
     return;
   }
   const fuelType = document.getElementById('fuel-type').value.trim();
   const fuelAmount = document.getElementById('fuel-amount').value.trim();
   const kilometerAmount = parseFloat(document.getElementById('kilometer-amount').value.trim());
   const fuelAdditionDateInput = document.getElementById('fuel-addition-date').value.trim();
-  
+
   if (!fuelType || !fuelAmount || isNaN(kilometerAmount) || !fuelAdditionDateInput) {
-    showToast('لطفاً همه فیلدها را پر کنید', 'Warning');
+    showToast(tm('fill_all_fields_fuel'), '⚠️');
     return;
   }
   if (kilometerAmount < MIN_KILOMETERS || kilometerAmount > MAX_KILOMETERS) {
     showToast(`میزان کیلومتر باید بین ${MIN_KILOMETERS.toLocaleString()} تا ${MAX_KILOMETERS.toLocaleString()} باشد`, '⚠️');
     return;
   }
-  
+
   // Parse the fuel addition date (it's in YYYY-MM-DD format from date input)
   const fuelAdditionDate = new Date(fuelAdditionDateInput);
   const year = fuelAdditionDate.getFullYear();
   const month = String(fuelAdditionDate.getMonth() + 1).padStart(2, '0');
   const day = String(fuelAdditionDate.getDate()).padStart(2, '0');
   const formattedFuelAdditionDate = `${year}/${month}/${day}`;
-  
+
   // Get current date for automatic "تاریخ" field
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
   const currentDay = String(now.getDate()).padStart(2, '0');
   const currentDate = `${currentYear}/${currentMonth}/${currentDay}`;
-  
+
   const previousReports = fuelReports.filter(report =>
     report.motorcycleName === selectedMotorcycleForFuel.motorcycleName &&
     report.motorcycleDepartment === selectedMotorcycleForFuel.motorcycleDepartment
@@ -2695,14 +2694,14 @@ async function submitFuelReport(event) {
   const gsData = mapFuelToGS(reportData);
   const result = await callGoogleSheets('create', 'fuel', gsData);
   if (result.success) {
-    showToast('گزارش تیل با موفقیت ثبت شد', 'Success');
+    showToast(tm('fuel_report_success'), '✅');
     closeModal('fuel-report-modal');
     fuelReports.push(reportData);
     document.getElementById('fuel-report-form').reset();
-    document.getElementById('fuel-motorcycle-display').textContent = 'موتور سکیل را انتخاب کنید';
+    document.getElementById('fuel-motorcycle-display').textContent = tm('select_fuel_motorcycle');
     selectedMotorcycleForFuel = null;
   } else {
-    showToast('خطا در ثبت گزارش تیل', 'Error');
+    showToast(tm('fuel_report_error'), '❌');
   }
 }
 
@@ -2720,7 +2719,7 @@ function renderMotorcyclesForFuel() {
     );
   }
   if (filteredMotorcycles.length === 0) {
-    container.innerHTML = '<div class="text-center py-12 text-gray-300"><p class="text-lg">هیچ موتور سیکلی یافت نشد</p></div>';
+    container.innerHTML = `<div class="text-center py-12 text-gray-300"><p class="text-lg">${tm('no_motorcycle_registered')}</p></div>`;
     return;
   }
   container.innerHTML = filteredMotorcycles.map(moto => `
@@ -2730,11 +2729,11 @@ function renderMotorcyclesForFuel() {
           <div class="motorcycle-icon">🏍️</div>
           <div>
             <h3 class="text-lg font-bold text-white">${moto.motorcycleName}</h3>
-            <p class="text-gray-200 mt-1">رنگ: ${moto.motorcycleColor}</p>
-            <p class="text-gray-200 mt-1">دیپارتمنت: ${moto.motorcycleDepartment}</p>
+            <p class="text-gray-200 mt-1">${tm('color')}: ${moto.motorcycleColor}</p>
+            <p class="text-gray-200 mt-1">${tm('department')}: ${moto.motorcycleDepartment}</p>
           </div>
         </div>
-        <span class="status-badge status-active">نمایش گزارش‌ها</span>
+        <span class="status-badge status-active">${tm('show_reports')}</span>
       </div>
     </div>
   `).join('');
@@ -2743,7 +2742,7 @@ function renderMotorcyclesForFuel() {
 function showMotorcycleFuelReports(motorcycleId) {
   const motorcycle = allData.find(d => d.__backendId === motorcycleId && d.type === 'motorcycle');
   if (!motorcycle) {
-    showToast('موتور سیکل یافت نشد', '❌');
+    showToast(tm('motorcycle_not_found'), '❌');
     return;
   }
   currentFuelReports = fuelReports.filter(report =>
@@ -2751,7 +2750,7 @@ function showMotorcycleFuelReports(motorcycleId) {
     report.motorcycleDepartment === motorcycle.motorcycleDepartment
   );
   const title = document.getElementById('motorcycle-reports-title');
-  if (title) title.textContent = `گزارش‌های تیل برای ${motorcycle.motorcycleName} (${motorcycle.motorcycleDepartment})`;
+  if (title) title.textContent = `${tm('fuel_reports_for_motorcycle')}: ${motorcycle.motorcycleName} (${motorcycle.motorcycleDepartment})`;
   renderFuelReportsList();
   document.getElementById('motorcycle-reports-modal').classList.add('active');
   document.getElementById('fuel-report-date-search').value = '';
@@ -2766,7 +2765,7 @@ function renderFuelReportsList() {
     filteredReports = filteredReports.filter(report => report.reportDate === formattedDate);
   }
   if (filteredReports.length === 0) {
-    list.innerHTML = '<div class="text-center py-12 text-gray-300"><p class="text-lg">هیچ گزارشی برای این موتور ثبت نشده</p></div>';
+    list.innerHTML = `<div class="text-center py-12 text-gray-300"><p class="text-lg">${tm('no_fuel_reports')}</p></div>`;
   } else {
     list.innerHTML = filteredReports.map(report => {
       let formattedDate = report.reportDate;
@@ -2783,12 +2782,12 @@ function renderFuelReportsList() {
             <div class="flex items-center gap-4">
               <div class="motorcycle-icon">⛽</div>
               <div>
-                <h3 class="text-lg font-bold text-white">نوع تیل: ${report.fuelType}</h3>
-                <p class="text-gray-200 mt-1">مقدار: ${report.fuelAmount} لیتر</p>
-                <p class="text-gray-200 mt-1">کیلومتر: ${report.kilometerAmount} km</p>
-                <p class="text-gray-200 mt-1">نام کارمند: ${report.reporterFullName}</p>
-                <p class="text-gray-200 mt-1">میزان طی مسیر: ${report.totalDistance || 0} km</p>
-                <p class="text-sm text-gray-100 mt-1">تاریخ: ${formattedDate}</p>
+                <h3 class="text-lg font-bold text-white">${tm('fuel_type')}: ${report.fuelType}</h3>
+                <p class="text-gray-200 mt-1">${tm('fuel_amount')}: ${report.fuelAmount} ${tm('liters')}</p>
+                <p class="text-gray-200 mt-1">${tm('kilometer')}: ${report.kilometerAmount} km</p>
+                <p class="text-gray-200 mt-1">${tm('reporter_name')}: ${report.reporterFullName}</p>
+                <p class="text-gray-200 mt-1">${tm('total_distance')}: ${report.totalDistance || 0} km</p>
+                <p class="text-sm text-gray-100 mt-1">${tm('date')}: ${formattedDate}</p>
               </div>
             </div>
           </div>
@@ -2956,7 +2955,7 @@ function updateOnlineStatus() {
       const cardHtml = `
         <div class="stat-card" id="online-status-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-sm opacity-90">🟢 آنلاین</span>
+            <span class="text-sm opacity-90">🟢 <span data-i18n="online">${tm('online')}</span></span>
             <span class="text-2xl">👥</span>
           </div>
           <p id="online-users" class="text-3xl font-bold">${onlineUsers}</p>
@@ -2969,6 +2968,11 @@ function updateOnlineStatus() {
     const onlineUsersElement = document.getElementById('online-users');
     if (onlineUsersElement) {
       onlineUsersElement.textContent = onlineUsers;
+    }
+    // Update online text with translation
+    const onlineLabel = onlineStatusCard.querySelector('[data-i18n="online"]');
+    if (onlineLabel) {
+      onlineLabel.textContent = tm('online');
     }
   }
 }
@@ -3019,7 +3023,7 @@ function renderMotorcycleDeptFilters() {
   const container = document.getElementById('dept-filters');
   if (!container) return;
   if (departments.length === 0) {
-    container.innerHTML = '<p class="text-gray-300 text-sm whitespace-nowrap">هیچ دیپارتمنتی موجود نیست</p>';
+    container.innerHTML = `<p class="text-gray-300 text-sm whitespace-nowrap">${tm('no_department_available')}</p>`;
     return;
   }
   let html = `<button id="motor-dept-all" class="btn btn-dept text-sm whitespace-nowrap ${currentMotorcycleDeptFilter === 'all' ? 'active-filter' : ''}" onclick="filterMotorcycleByDept('all')">همه</button>`;
@@ -3332,13 +3336,13 @@ async function loadNotificationBadge() {
     if (result.success && result.data) {
       const allNotifications = result.data.filter(n => n['Unique ID'] || n.__backendId);
       const readNotifications = getReadNotifications();
-      
+
       // Count only unread notifications
       const unreadCount = allNotifications.filter(n => {
         const id = n['Unique ID'] || n.__backendId;
         return !readNotifications.includes(id);
       }).length;
-      
+
       const badge = document.getElementById('notification-badge');
       if (badge) {
         if (unreadCount > 0) {
