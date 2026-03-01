@@ -1,4 +1,4 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyww7epAA7sdeIzj6BMN-e_aJn_ayskB0M0zACbQ1YjJMSpsQ_ctx9G8QiW9nldvSqdZA/exec'; // URL دیپلوی
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzi-ysnmW4q8vXttT6ozYNPoLBmBUTwk_4nmcCKdCN7Ey2xO-UawJ01430_4E6qS9OhHg/exec'; // URL دیپلوی
 async function callGoogleSheets(action, sheetName, data = null) {
   try {
     const params = new URLSearchParams({
@@ -493,5 +493,6 @@ async function syncAlarmsWithGoogleSheets() {
     return [];
   }
 }
+
 
 
